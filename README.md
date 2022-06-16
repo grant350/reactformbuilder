@@ -78,17 +78,6 @@ var formArray = {
 ```
 
 
-# How to getdata from the formGroup?
-
- ```js
- // to get data you must use a refrence to the formGroup.
-   function submit(){
-      var formvalue = this.myRef.current.getData();
-      console.log('formvalue',formvalue)
-   }
-  <FormGroup ref={this.myRef} controls={formgroup} name={'order'}  />
-```
-
 
 
 
@@ -210,7 +199,41 @@ class Input extends React.Component {
 
 
 
+# How to getdata from the formGroup?
+
+ ```js
+ // to get data you must use a refrence to the formGroup.
+   function submit(){
+      var formvalue = this.myRef.current.getData();
+      console.log('formvalue',formvalue)
+   }
+  <FormGroup ref={this.myRef} controls={formgroup} name={'order'}  />
+  <button onClick={this.submit|| submit}></button>
+
+```
+
+# How to clear the form?
+
+ ```js
+ // to get data you must use a refrence to the formGroup.
+   function submit(){
+      this.myRef.current.reset();
+   }
+
+  <FormGroup ref={this.myRef} controls={formgroup} name={'order'}  />
+   <button onClick={this.submit|| submit}></button>
+```
 
 
+## How to Contribute?
+
+### you can contribute by emailing my at welcometoreality2808@gmail.com or https://www.linkedin.com/in/grant-mitchell-82a756150/.
 
 
+## The process is to branch off the main and make some minor changes to the code or add component features. once you have finished your changes make a pull requests to be reviewed. once reviewed, the branch will be merged to main.
+
+## for major changes please fork the project.
+
+## this code cannot be distributed for commercial use, please contact me for commercial use.
+
+## whats needed majorly is efficency and pre build components for people to use. now since this is nested there should be an option for a server middleware for images to load 64bit data.

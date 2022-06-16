@@ -9,7 +9,6 @@ class FormArray extends React.Component{
     super(props);
     this.type = "formArray";
     this.name = this.props.name;
-
     this.state = {
       statuses:[],
       color:"#36bc78",
@@ -17,8 +16,9 @@ class FormArray extends React.Component{
       status: this.props.status? this.props.status: "VALID",
       controls:this.props.controls
     }
+    this.reset = this.reset.bind(this);
 
-
+    this.refrences=[];
     this.makeChildren = this.makeChildren.bind(this);
     this.addChild = this.addChild.bind(this);
     this.removeChild = this.removeChild.bind(this);
@@ -26,11 +26,36 @@ class FormArray extends React.Component{
     this.setParent = this.setParent.bind(this);
     this.checkStatus = this.checkStatus.bind(this);
 
+    this.copyState = Object.assign({},this.state);
+
     this.copy = Object.assign({}, this.props.controls.slice(0,1)[0]);
-    // this.statusToColor = this.statusToColor.bind(this);
     this.state.controls.forEach((item,index)=>{
       this.state.statuses[index]="VALID";
+      this.refrences[index]=React.createRef();
     })
+
+  }
+
+
+  reset(){
+
+    this.setState({...this.copyState},()=>{
+      if (this.refrences){
+        this.refrences.forEach(refrences=>{
+          var control = refrences.current;
+          if ( control instanceof FormControl){
+              control.update('');
+          }
+          if ( control instanceof FormGroup){
+              control.reset();
+          }
+          if ( control instanceof FormArray){
+            control.reset();
+          }
+
+        });
+      }
+    });
 
   }
   //last but not least is to change value from [] to put in controls.
@@ -116,20 +141,19 @@ class FormArray extends React.Component{
           if (child.JSXElement === undefined ){
             child.JSXElement = Input;
           }
-          return <FormControl disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
+          return <FormControl ref={this.refrences[index]} disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
           }
         if (child.type === 'formArray' ){
           if (child.JSXContainer === undefined ){
             child.JSXContainer = Container;
           }
-          return  <FormArray setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]} name={child.name} key={index}  JSXContainer={child.JSXContainer} controls={child.controls} />;
+          return  <FormArray l ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]} name={child.name} key={index}  JSXContainer={child.JSXContainer} controls={child.controls} />;
         }
         if (child.type === 'formGroup' ){
           if (child.JSXContainer === undefined ){
             child.JSXContainer = Container;
           }
-          return <FormGroup setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]}  name={child.name}  key={index}  controls={child.controls} JSXContainer={child.JSXContainer} />;
-
+          return <FormGroup l ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]}  name={child.name}  key={index}  controls={child.controls} JSXContainer={child.JSXContainer} />;
         }
       })
     }

@@ -18,10 +18,11 @@ class FormGroup extends React.Component {
       statuses:{},
       color:"#36bc78"
      }
-     this.copyState = Object.assign({},this.state)
+     this.refrences={};
      this.getData = this.getData.bind(this);
      Object.keys(this.props.controls).forEach(key=>{
       this.state.statuses[key]="VALID";
+      this.refrences[key]=React.createRef();
        switch (this.props.controls[key].type){
         case 'formControl': this.state.value[key] = "";
         break;
@@ -33,10 +34,14 @@ class FormGroup extends React.Component {
      })
      this.setParent = this.setParent.bind(this);
      this.checkStatus = this.checkStatus.bind(this);
-     this.clearForm = this.clearForm.bind(this);
+     this.reset = this.reset.bind(this);
+     this.copyState = Object.assign({},this.state)
 
   }
 
+  componentDidUpdate(){
+
+  }
     checkStatus(statuses){
       if (Object.values(statuses).includes('PENDING')){
         return 'PENDING'
@@ -47,32 +52,44 @@ class FormGroup extends React.Component {
       }
     }
 
-    //how to clear the form.
+    reset(){
+      this.setState({...this.copyState},()=>{
+        if (this.refrences){
+          Object.keys(this.refrences).forEach(key=>{
+            var control = this.refrences[key].current;
+            if ( control instanceof FormControl){
+                control.update('');
+            }
+            if ( control instanceof FormGroup){
+                control.reset();
+            }
+            if ( control instanceof FormArray){
+              control.reset();
 
-    clearForm(){
-      // this.copyState;
-      this.setState({value:this.copyState.value, statuses:this.copyState.statuses,status:this.copyState.status,controls:this.copyState.controls})
+            }
+
+          });
+        }
+      });
+      //this is fine what should happen is the furthest refrenece will validate again
+
     }
-
-
 
     setParent(key,value,status){
       var statuses =this.state.statuses
-        statuses[key]=status;
-     var newstatus= this.checkStatus(statuses);
-      var statevalue = Object.assign({},this.state.value);
-      statevalue[key] = value;
-      this.setState({value:statevalue,statuses:statuses,status:newstatus},()=>{
-       if (this.props.setParent){
-         if (this.props.parent.type === 'formGroup'){
-         this.props.setParent(this.name,this.state.value,this.state.status)
-         } else if (this.props.parent.type === 'formArray'){
-          this.props.setParent(this.props.index,this.state.value,this.state.status)
-         }
-
-       }
-      });
-
+          statuses[key]=status;
+      var newstatus= this.checkStatus(statuses);
+        var statevalue = Object.assign({},this.state.value);
+        statevalue[key] = value;
+        this.setState({value:statevalue,statuses:statuses,status:newstatus},()=>{
+        if (this.props.setParent){
+          if (this.props.parent.type === 'formGroup'){
+            this.props.setParent(this.name,this.state.value,this.state.status)
+          } else if (this.props.parent.type === 'formArray'){
+            this.props.setParent(this.props.index,this.state.value,this.state.status)
+          }
+        }
+        });
      }
 
     getData(){
@@ -86,19 +103,19 @@ class FormGroup extends React.Component {
         if (child.JSXElement === undefined ){
           child.JSXElement = Input;
         }
-        return <FormControl  disabled={child.disabled} width={child.width}  label={child.label} setParent={this.setParent} validator={child.validator} parent={this} control={child}  index={index}  JSXElement={child.JSXElement} name={key} value={this.state.value[key]} status={this.state.statuses[key]} key={key}/>
+        return <FormControl ref={this.refrences[key]} disabled={child.disabled} width={child.width}  label={child.label} setParent={this.setParent} validator={child.validator} parent={this} control={child}  index={index}  JSXElement={child.JSXElement} name={key} value={this.state.value[key]} status={this.state.statuses[key]} key={key}/>
         }
       if (child.type === 'formArray' ){
         if (child.JSXContainer === undefined ){
           child.JSXContainer = Container;
         }
-        return  <FormArray setParent={this.setParent}   parent={this}  control={child} value={this.state.value[key]} name={key} key={key}  index={index} JSXContainer={child.JSXContainer} status={this.state.statuses[key]} controls={child.controls} />;
+        return  <FormArray ref={this.refrences[key]}  setParent={this.setParent}   parent={this}  control={child} value={this.state.value[key]} name={key} key={key}  index={index} JSXContainer={child.JSXContainer} status={this.state.statuses[key]} controls={child.controls} />;
       }
       if (child.type === 'formGroup' ){
         if (child.JSXContainer === undefined ){
           child.JSXContainer = Container;
         }
-        return <FormGroup setParent={this.setParent} parent={this}  control={child} value={this.state.value[key]} index={index}  name={key}  controls={child.controls} status={this.state.statuses[key]} JSXContainer={child.JSXContainer} key={key} />;
+        return <FormGroup ref={this.refrences[key]} setParent={this.setParent} parent={this}  control={child} value={this.state.value[key]} index={index}  name={key}  controls={child.controls} status={this.state.statuses[key]} JSXContainer={child.JSXContainer} key={key} />;
       }
     })
   }
@@ -119,7 +136,7 @@ class FormGroup extends React.Component {
       return (
         <React.Fragment>
         <div className = "formGroup"  style={{"borderLeft":"10px solid " +getBorder()}}>
-        <this.Container children={this.makeChildren(this.state.controls)}/>
+        <this.Container ref={this.state.ref} children={this.makeChildren(this.state.controls)}/>
        </div>
       </React.Fragment>)
     }

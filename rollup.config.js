@@ -2,7 +2,7 @@ import css from  'rollup-plugin-css-only';
 import babel from '@rollup/plugin-babel';
 
 export default {
-  input:'components/index.js',
+  input:'formbuilder/index.js',
   output: {
     dir:"dist/",
     format:"es",

@@ -5,6 +5,7 @@ import _possibleConstructorReturn from '@babel/runtime/helpers/possibleConstruct
 import _getPrototypeOf from '@babel/runtime/helpers/getPrototypeOf';
 import React from 'react';
 import { FormGroup as FormGroup$2, Button, FormControl as FormControl$1, TextField } from '@mui/material';
+import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
 import { BehaviorSubject } from 'rxjs';
 
@@ -18,13 +19,9 @@ var Container = /*#__PURE__*/function (_React$Component) {
   var _super = _createSuper$4(Container);
 
   function Container(props) {
-    var _this;
-
     _classCallCheck(this, Container);
 
-    _this = _super.call(this, props);
-    console.log(props);
-    return _this;
+    return _super.call(this, props);
   }
 
   _createClass(Container, [{
@@ -158,35 +155,32 @@ var FormControl = /*#__PURE__*/function (_React$Component) {
     value: function update(value) {
       var _this2 = this;
 
-      setTimeout(function () {
-        if (_this2.validator) {
-          _this2.subject$.next(null);
+      if (this.validator) {
+        this.subject$.next(null);
+        this.validator(value, this.subject$);
+      } else {
+        this.subject$.next(true);
+      }
 
-          _this2.validator(value, _this2.subject$);
-        } else {
-          _this2.subject$.next(true);
+      this.subject$.subscribe(function (x) {
+        var status;
+
+        if (x === null) {
+          status = 'PENDING';
+        } else if (x === false) {
+          status = 'INVALID';
+        } else if (x === true) {
+          status = "VALID";
         }
 
-        _this2.subject$.subscribe(function (x) {
-          var status;
+        if (_this2.props.parent.type === 'formGroup') {
+          _this2.props.setParent(_this2.name, value, status);
+        }
 
-          if (x === null) {
-            status = 'PENDING';
-          } else if (x === false) {
-            status = 'INVALID';
-          } else if (x === true) {
-            status = "VALID";
-          }
-
-          if (_this2.props.parent.type === 'formGroup') {
-            _this2.props.setParent(_this2.name, value, status);
-          }
-
-          if (_this2.props.parent.type === 'formArray') {
-            _this2.props.setParent(_this2.props.index, value, status);
-          }
-        });
-      }, 50);
+        if (_this2.props.parent.type === 'formArray') {
+          _this2.props.setParent(_this2.props.index, value, status);
+        }
+      });
     }
   }, {
     key: "render",
@@ -220,6 +214,10 @@ var FormControl = /*#__PURE__*/function (_React$Component) {
   return FormControl;
 }(React.Component);
 
+function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys$1(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys$1(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
 function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -244,23 +242,52 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
       status: _this.props.status ? _this.props.status : "VALID",
       controls: _this.props.controls
     };
+    _this.reset = _this.reset.bind(_assertThisInitialized(_this));
+    _this.refrences = [];
     _this.makeChildren = _this.makeChildren.bind(_assertThisInitialized(_this));
     _this.addChild = _this.addChild.bind(_assertThisInitialized(_this));
     _this.removeChild = _this.removeChild.bind(_assertThisInitialized(_this));
     _this.resetControl = _this.resetControl.bind(_assertThisInitialized(_this));
     _this.setParent = _this.setParent.bind(_assertThisInitialized(_this));
     _this.checkStatus = _this.checkStatus.bind(_assertThisInitialized(_this));
-    _this.copy = Object.assign({}, _this.props.controls.slice(0, 1)[0]); // this.statusToColor = this.statusToColor.bind(this);
+    _this.copyState = Object.assign({}, _this.state);
+    _this.copy = Object.assign({}, _this.props.controls.slice(0, 1)[0]);
 
     _this.state.controls.forEach(function (item, index) {
       _this.state.statuses[index] = "VALID";
+      _this.refrences[index] = /*#__PURE__*/React.createRef();
     });
 
     return _this;
-  } //last but not least is to change value from [] to put in controls.
-
+  }
 
   _createClass(FormArray, [{
+    key: "reset",
+    value: function reset() {
+      var _this2 = this;
+
+      this.setState(_objectSpread$1({}, this.copyState), function () {
+        if (_this2.refrences) {
+          _this2.refrences.forEach(function (refrences) {
+            var control = refrences.current;
+
+            if (control instanceof FormControl) {
+              control.update('');
+            }
+
+            if (control instanceof FormGroup$1) {
+              control.reset();
+            }
+
+            if (control instanceof FormArray) {
+              control.reset();
+            }
+          });
+        }
+      });
+    } //last but not least is to change value from [] to put in controls.
+
+  }, {
     key: "checkStatus",
     value: function checkStatus(statuses) {
       if (statuses.includes('INVALID')) {
@@ -274,7 +301,7 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "setParent",
     value: function setParent(key, value, status) {
-      var _this2 = this;
+      var _this3 = this;
 
       var statuses = this.state.statuses.slice();
 
@@ -290,11 +317,11 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
         statuses: statuses,
         status: newstatus
       }, function () {
-        if (_this2.props.setParent) {
-          if (_this2.props.parent.type === 'formGroup') {
-            _this2.props.setParent(_this2.name, _this2.state.value, _this2.state.status);
-          } else if (_this2.props.parent.type === 'formArray') {
-            _this2.props.setParent(_this2.props.index, _this2.state.value, _this2.state.status);
+        if (_this3.props.setParent) {
+          if (_this3.props.parent.type === 'formGroup') {
+            _this3.props.setParent(_this3.name, _this3.state.value, _this3.state.status);
+          } else if (_this3.props.parent.type === 'formArray') {
+            _this3.props.setParent(_this3.props.index, _this3.state.value, _this3.state.status);
           }
         }
       });
@@ -335,7 +362,7 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "makeChildren",
     value: function makeChildren(ctls) {
-      var _this3 = this;
+      var _this4 = this;
 
       return ctls.map(function (child, index) {
         if (child.type === 'formControl') {
@@ -344,20 +371,21 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormControl, {
+            ref: _this4.refrences[index],
             disabled: child.disabled,
             width: child.width,
             label: child.label,
-            setParent: _this3.setParent,
-            parent: _this3,
+            setParent: _this4.setParent,
+            parent: _this4,
             control: child,
             validator: child.validator,
-            VALIDATE: _this3.VALIDATE,
+            VALIDATE: _this4.VALIDATE,
             index: index,
             JSXElement: child.JSXElement,
             name: child.name,
             key: index,
-            value: _this3.state.value[index],
-            status: _this3.state.statuses[index]
+            value: _this4.state.value[index],
+            status: _this4.state.statuses[index]
           });
         }
 
@@ -367,12 +395,14 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormArray, {
-            setParent: _this3.setParent,
-            parent: _this3,
+            l: true,
+            ref: _this4.refrences[index],
+            setParent: _this4.setParent,
+            parent: _this4,
             control: child,
             index: index,
-            VALIDATE: _this3.VALIDATE,
-            value: _this3.state.value[index],
+            VALIDATE: _this4.VALIDATE,
+            value: _this4.state.value[index],
             name: child.name,
             key: index,
             JSXContainer: child.JSXContainer,
@@ -386,12 +416,14 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormGroup$1, {
-            setParent: _this3.setParent,
-            parent: _this3,
+            l: true,
+            ref: _this4.refrences[index],
+            setParent: _this4.setParent,
+            parent: _this4,
             control: child,
             index: index,
-            VALIDATE: _this3.VALIDATE,
-            value: _this3.state.value[index],
+            VALIDATE: _this4.VALIDATE,
+            value: _this4.state.value[index],
             name: child.name,
             key: index,
             controls: child.controls,
@@ -454,12 +486,12 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
       var getBorder = function getBorder() {
-        if (_this4.state.status === "VALID") {
+        if (_this5.state.status === "VALID") {
           return "#36bc78";
-        } else if (_this4.state.status === "PENDING") {
+        } else if (_this5.state.status === "PENDING") {
           return "#f2da33";
         } else {
           return "#cb1842";
@@ -481,6 +513,10 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
 
   return FormArray;
 }(React.Component);
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -507,10 +543,11 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
       statuses: {},
       color: "#36bc78"
     };
-    _this.copyState = Object.assign({}, _this.state);
+    _this.refrences = {};
     _this.getData = _this.getData.bind(_assertThisInitialized(_this));
     Object.keys(_this.props.controls).forEach(function (key) {
       _this.state.statuses[key] = "VALID";
+      _this.refrences[key] = /*#__PURE__*/React.createRef();
 
       switch (_this.props.controls[key].type) {
         case 'formControl':
@@ -528,11 +565,15 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
     });
     _this.setParent = _this.setParent.bind(_assertThisInitialized(_this));
     _this.checkStatus = _this.checkStatus.bind(_assertThisInitialized(_this));
-    _this.clearForm = _this.clearForm.bind(_assertThisInitialized(_this));
+    _this.reset = _this.reset.bind(_assertThisInitialized(_this));
+    _this.copyState = Object.assign({}, _this.state);
     return _this;
   }
 
   _createClass(FormGroup, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {}
+  }, {
     key: "checkStatus",
     value: function checkStatus(statuses) {
       if (Object.values(statuses).includes('PENDING')) {
@@ -544,20 +585,34 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
       }
     }
   }, {
-    key: "clearForm",
-    value: function clearForm() {
-      // this.copyState;
-      this.setState({
-        value: this.copyState.value,
-        statuses: this.copyState.statuses,
-        status: this.copyState.status,
-        controls: this.copyState.controls
-      });
+    key: "reset",
+    value: function reset() {
+      var _this2 = this;
+
+      this.setState(_objectSpread({}, this.copyState), function () {
+        if (_this2.refrences) {
+          Object.keys(_this2.refrences).forEach(function (key) {
+            var control = _this2.refrences[key].current;
+
+            if (control instanceof FormControl) {
+              control.update('');
+            }
+
+            if (control instanceof FormGroup) {
+              control.reset();
+            }
+
+            if (control instanceof FormArray) {
+              control.reset();
+            }
+          });
+        }
+      }); //this is fine what should happen is the furthest refrenece will validate again
     }
   }, {
     key: "setParent",
     value: function setParent(key, value, status) {
-      var _this2 = this;
+      var _this3 = this;
 
       var statuses = this.state.statuses;
       statuses[key] = status;
@@ -569,11 +624,11 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
         statuses: statuses,
         status: newstatus
       }, function () {
-        if (_this2.props.setParent) {
-          if (_this2.props.parent.type === 'formGroup') {
-            _this2.props.setParent(_this2.name, _this2.state.value, _this2.state.status);
-          } else if (_this2.props.parent.type === 'formArray') {
-            _this2.props.setParent(_this2.props.index, _this2.state.value, _this2.state.status);
+        if (_this3.props.setParent) {
+          if (_this3.props.parent.type === 'formGroup') {
+            _this3.props.setParent(_this3.name, _this3.state.value, _this3.state.status);
+          } else if (_this3.props.parent.type === 'formArray') {
+            _this3.props.setParent(_this3.props.index, _this3.state.value, _this3.state.status);
           }
         }
       });
@@ -586,7 +641,7 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "makeChildren",
     value: function makeChildren(ctls) {
-      var _this3 = this;
+      var _this4 = this;
 
       return Object.keys(ctls).map(function (key, index) {
         var child = ctls[key];
@@ -597,18 +652,19 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormControl, {
+            ref: _this4.refrences[key],
             disabled: child.disabled,
             width: child.width,
             label: child.label,
-            setParent: _this3.setParent,
+            setParent: _this4.setParent,
             validator: child.validator,
-            parent: _this3,
+            parent: _this4,
             control: child,
             index: index,
             JSXElement: child.JSXElement,
             name: key,
-            value: _this3.state.value[key],
-            status: _this3.state.statuses[key],
+            value: _this4.state.value[key],
+            status: _this4.state.statuses[key],
             key: key
           });
         }
@@ -619,15 +675,16 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormArray, {
-            setParent: _this3.setParent,
-            parent: _this3,
+            ref: _this4.refrences[key],
+            setParent: _this4.setParent,
+            parent: _this4,
             control: child,
-            value: _this3.state.value[key],
+            value: _this4.state.value[key],
             name: key,
             key: key,
             index: index,
             JSXContainer: child.JSXContainer,
-            status: _this3.state.statuses[key],
+            status: _this4.state.statuses[key],
             controls: child.controls
           });
         }
@@ -638,14 +695,15 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormGroup, {
-            setParent: _this3.setParent,
-            parent: _this3,
+            ref: _this4.refrences[key],
+            setParent: _this4.setParent,
+            parent: _this4,
             control: child,
-            value: _this3.state.value[key],
+            value: _this4.state.value[key],
             index: index,
             name: key,
             controls: child.controls,
-            status: _this3.state.statuses[key],
+            status: _this4.state.statuses[key],
             JSXContainer: child.JSXContainer,
             key: key
           });
@@ -655,14 +713,14 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
       var getBorder = function getBorder() {
-        if (_this4.state.status === "VALID") {
+        if (_this5.state.status === "VALID") {
           return "#36bc78";
-        } else if (_this4.state.status === "PENDING") {
+        } else if (_this5.state.status === "PENDING") {
           return "#f2da33";
-        } else if (_this4.state.status === "INVALID") {
+        } else if (_this5.state.status === "INVALID") {
           return "#cb1842";
         }
       };
@@ -673,6 +731,7 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
           "borderLeft": "10px solid " + getBorder()
         }
       }, /*#__PURE__*/React.createElement(this.Container, {
+        ref: this.state.ref,
         children: this.makeChildren(this.state.controls)
       })));
     }

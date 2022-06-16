@@ -22,7 +22,6 @@ class FormControl extends React.Component {
   }
 
   update(value){
-    setTimeout(()=>{
       if (this.validator){
           this.subject$.next(null);
           this.validator(value,this.subject$);
@@ -47,7 +46,6 @@ class FormControl extends React.Component {
 
     })
 
-  },50);
 
   }
 

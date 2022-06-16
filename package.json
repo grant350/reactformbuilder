@@ -1,11 +1,11 @@
 {
   "name": "@zenabyss/reactformbuilder",
-  "version": "1.2.5",
+  "version": "1.2.7",
   "description": "reactive formbuilder",
   "notes": " readme not finished",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/grant350/components.git"
+    "url": "git+ssh://git@github.com/grant350/reactformbuilder.git"
   },
   "module": "dist/index.js",
   "scripts": {
@@ -16,9 +16,9 @@
   "license" : "GNU3",
   "licenseURL": "https://www.gnu.org/licenses/gpl-3.0.en.html",
   "bugs": {
-    "url": "https://github.com/grant350/components/issues"
+    "url": "https://github.com/grant350/reactformbuilder/issues"
   },
-  "homepage": "https://github.com/grant350/components#readme",
+  "homepage": "https://github.com/grant350/reactformbuilder#readme",
   "devDependencies": {
     "@babel/cli": "^7.17.0",
     "@babel/core": "^7.17.2",
