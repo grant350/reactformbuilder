@@ -225,6 +225,198 @@ class Input extends React.Component {
 ```
 
 
+# More examples...
+
+
+## Here is an example of an order form
+
+### in this form below we have alot of synchronous validators, these validators run instantly. Down in the products array upc lookup input makes an axios call which is asynchronous. Soo if the call to get data back from the server took 3 seconds, the form border color's will be (yellow || PENDING). when the 3 seconds is up, the input field will be red or green (INVALID || VALID)
+
+
+
+```js
+ var formgroup = {
+        "customer_name": {
+          "type": "formControl",
+          "label": "name",
+          "validator": (value, obs) => {
+            if (value.length !== 0) {
+              obs.next(true)
+            } else {
+              obs.next(false)
+            }
+          }
+        },
+        "customer_street": {
+          "type": "formControl",
+          "label": "street address"
+        },
+        "state": {
+          "type": "formControl",
+          "JSXElement": Selector,
+          "dataInject": this.states,
+          "label": "state"
+        },
+        "city": {
+          "type": "formControl",
+          "label": "city"
+        },
+        "tax": {
+          "type": "formControl",
+          "label": "tax",
+          "validator": (val, obs) => {
+            var countDecimals = function (v) {
+              if (v.length >= 1) {
+                var split = v.split('.')
+                if (split.length >= 2) {
+                  return v.split(".")[1].length || 0;
+                } else {
+                  return 0;
+                }
+              } else {
+                return 0
+              }
+            }
+            if (countDecimals(val) === 2) {
+              obs.next(true);
+            } else {
+              obs.next(false);
+            }
+          }
+        },
+        "total": {
+          "type": "formControl",
+          "label": "total",
+          "validator": (val, obs) => {
+            var countDecimals = function (v) {
+              if (v.length >= 1) {
+                var split = v.split('.')
+                if (split.length >= 2) {
+                  return v.split(".")[1].length || 0;
+                } else {
+                  return 0;
+                }
+              } else {
+                return 0
+              }
+            }
+            if (countDecimals(val) === 2) {
+              obs.next(true);
+            } else {
+              obs.next(false);
+            }
+          }
+        },
+        "tracking": {
+          "type": "formControl",
+          "label": "tracking",
+          "validator": (val, obs) => {
+            if (isNaN(val) === false && val.length > 7) {
+              obs.next(true);
+            } else {
+              obs.next(false)
+            }
+          }
+        },
+
+        "shipping_cost": {
+          "type": "formControl",
+          "label": "shipping cost",
+          "validator": (val, obs) => {
+            var countDecimals = function (v) {
+              if (v.length >= 1) {
+                var split = v.split('.')
+                if (split.length >= 2) {
+                  return v.split(".")[1].length || 0;
+                } else {
+                  return 0;
+                }
+              } else {
+                return 0
+              }
+            }
+            if (countDecimals(val) === 2) {
+              obs.next(true);
+            } else {
+              obs.next(false);
+            }
+          }
+        },
+        "products": {
+          "type": "formArray",
+          "controls": [{
+            "name": "product",
+            "type": "formGroup",
+            "controls": {
+              "model": {
+                "type": "formControl",
+                "label": "model"
+              },
+              "product_cost": {
+                "type": "formControl",
+                "label": "product cost",
+                "validator": (val, obs) => {
+                  var countDecimals = function (v) {
+                    if (v.length >= 1) {
+                      var split = v.split('.')
+                      if (split.length >= 2) {
+                        return v.split(".")[1].length || 0;
+                      } else {
+                        return 0;
+                      }
+                    } else {
+                      return 0
+                    }
+                  }
+                  if (countDecimals(val) === 2) {
+                    obs.next(true);
+                  } else {
+                    obs.next(false);
+                  }
+                }
+              },
+              "upc": {
+                "type": "formControl",
+                "label": "upc",
+                "validator": (value, obs) => {
+                  if (value.length === 12) {
+
+
+                    axios.get('http://127.0.0.1:8080/searchProducts', {
+                      params: {
+                        query: value
+                      }
+                    }).then(response => {
+                      if (response.data.data.length === 1) {
+                        obs.next(true);
+                      } else {
+                        obs.next(false);
+                      }
+                    })
+                  } else {
+                    obs.next(false)
+                  }
+                }
+              },
+              "quantity": {
+                "type": "formControl",
+                "label": "quantity",
+                "validator": (value, obs) => {
+                  if (isNaN(parseInt(value)) === false) {
+                    obs.next(true)
+                  } else {
+                    obs.next(false)
+                  }
+                }
+              }
+            }
+          }]
+        }
+ }
+
+
+```
+
 ## How to Contribute?
 
 ### you can contribute by emailing my at welcometoreality2808@gmail.com or https://www.linkedin.com/in/grant-mitchell-82a756150/.

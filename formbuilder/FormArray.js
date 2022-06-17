@@ -32,6 +32,7 @@ class FormArray extends React.Component{
     this.state.controls.forEach((item,index)=>{
       this.state.statuses[index]="VALID";
       this.refrences[index]=React.createRef();
+      var control = this.props.controls[index]
     })
 
   }
@@ -141,7 +142,7 @@ class FormArray extends React.Component{
           if (child.JSXElement === undefined ){
             child.JSXElement = Input;
           }
-          return <FormControl ref={this.refrences[index]} disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
+          return <FormControl dataInject={child.dataInject} dataType={child.dataType} className={child.className} required={child.required}  helperMessage={child.helperMessage} errorMessage={child.errorMessage}  ref={this.refrences[index]} disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
           }
         if (child.type === 'formArray' ){
           if (child.JSXContainer === undefined ){
@@ -162,10 +163,8 @@ class FormArray extends React.Component{
     var controls = this.state.controls.slice(0)
     controls.push(this.resetControl(this.copy))
 
-
     var length = controls.length;
     var value = this.state.value.slice();
-
     switch (controls[controls.length-1].type){
       case 'formControl': value.push("");
       break;
