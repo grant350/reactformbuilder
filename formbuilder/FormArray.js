@@ -27,7 +27,7 @@ class FormArray extends React.Component{
     this.checkStatus = this.checkStatus.bind(this);
 
     this.copyState = Object.assign({},this.state);
-
+    this.autoFill = this.props.autoFill? this.props.autoFill:[];
     this.copy = Object.assign({}, this.props.controls.slice(0,1)[0]);
     this.state.controls.forEach((item,index)=>{
       this.state.statuses[index]="VALID";
@@ -138,23 +138,26 @@ class FormArray extends React.Component{
 
     makeChildren(ctls){
      return  ctls.map( (child, index)=>{
+      if (this.autoFill[index]){
+        this.state.value[index] = this.autoFill[index]
+       }
         if (child.type === 'formControl' ){
           if (child.JSXElement === undefined ){
             child.JSXElement = Input;
           }
-          return <FormControl dataInject={child.dataInject} dataType={child.dataType} className={child.className} required={child.required}  helperMessage={child.helperMessage} errorMessage={child.errorMessage}  ref={this.refrences[index]} disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
+          return <FormControl controlType={child.controlType} dataInject={child.dataInject} dataType={child.dataType} className={child.className} required={child.required}  helperText={child.helperText} errorMessage={child.errorMessage}  ref={this.refrences[index]} disabled={child.disabled} width={child.width} label={child.label} setParent={this.setParent} parent={this} control={child} validator={child.validator}  VALIDATE={this.VALIDATE} index={index}  JSXElement={child.JSXElement} name={child.name} key={index}  value={this.state.value[index]} status={this.state.statuses[index]} />
           }
         if (child.type === 'formArray' ){
           if (child.JSXContainer === undefined ){
             child.JSXContainer = Container;
           }
-          return  <FormArray l ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]} name={child.name} key={index}  JSXContainer={child.JSXContainer} controls={child.controls} />;
+          return  <FormArray autoFill={this.autoFill[index]} ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]} name={child.name} key={index}  JSXContainer={child.JSXContainer} controls={child.controls} />;
         }
         if (child.type === 'formGroup' ){
           if (child.JSXContainer === undefined ){
             child.JSXContainer = Container;
           }
-          return <FormGroup l ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]}  name={child.name}  key={index}  controls={child.controls} JSXContainer={child.JSXContainer} />;
+          return <FormGroup  autoFill={this.autoFill[index]}  ref={this.refrences[index]} setParent={this.setParent} parent={this} control={child} index={index} VALIDATE={this.VALIDATE} value={this.state.value[index]}  name={child.name}  key={index}  controls={child.controls} JSXContainer={child.JSXContainer} />;
         }
       })
     }
@@ -211,8 +214,8 @@ class FormArray extends React.Component{
     }
     return (
       <React.Fragment>
-    <div className="formArray" style={{"borderLeft":"10px solid " +getBorder()}}>
-      <this.props.JSXContainer addChild={this.addChild} removeChild={this.removeChild} children={this.makeChildren(this.state.controls)} />
+    <div className="formArray" >
+      <this.props.JSXContainer border={getBorder()}  addChild={this.addChild} removeChild={this.removeChild} children={this.makeChildren(this.state.controls)} />
     </div>
 
 

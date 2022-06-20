@@ -14,14 +14,15 @@ class Input extends React.Component {
         onChange={(e)=>{this.props.update(e.target.value)}}
         onClick={(e)=>{this.props.touchEvent(e)}}
         value={this.props.value}
-        label={this.props.label? this.props.label:"type here"}
+        type={this.props.controlType}
+        label={this.props.innerlabel? this.props.s:"type here"}
         error={this.props.error? this.props.error:false}
         required={this.props.required? this.props.required:false}
         disabled={this.props.disabled? this.props.disabled:false}
         helperText={this.props.helperText? this.props.helperText:""}
         InputProps={{ style: { fontSize: this.props.InputProps? this.props.InputProp:10 } }}
         InputLabelProps={{ style: { fontSize: (this.props.InputLabelProps? this.props.InputLabelProps:12) } }}
-        style={{background:'white', "borderLeft":"20px solid "+this.props.border,"borderRadius": "10px"}}
+        style={{background:'white', "borderLeft":"20px solid "+this.props.border,"borderRadius": "10px",boxSizing: "border-box"}}
         id="filled-basic"
         variant="filled" />
       </FormControl>

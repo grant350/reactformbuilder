@@ -1,9 +1,9 @@
 {
   "name": "@zenabyss/reactformbuilder",
-  "version": "1.3.1",
+  "version": "1.3.3",
   "description": "reactive formbuilder",
   "notes": " readme not finished",
-  "keywords": ["react","formbuilder","form builder","form-builder","reactive-formbuilder","reactive forms","react form builder"],
+  "keywords": ["react","react form builder","formbuilder","form builder","form-builder","reactive-formbuilder","reactive forms"],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/grant350/reactformbuilder.git"

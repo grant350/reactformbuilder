@@ -14,18 +14,33 @@ class FormControl extends React.Component {
     this.label = this.props.label? this.props.label:'type here';
     this.width = this.props.width? this.props.width:'200px';
     this.dataType = this.props.dataType;
-    this.disabled= this.props.disabled? this.props.disabled:false;
+    this.parent = this.props.parent;
     this.dataType = this.props.dataType;
     this.getDataType = this.getDataType.bind(this)
-    this.state = {error:false, touched:false}
+    this.state = {error:false, touched:false,dirty:false,enabled:true,disabled:this.props.disabled? this.props.disabled:false}
     this.value = this.props.value? this.props.value:this.getDataType();
+    if (this.state.disabled){
+      this.value = ''
+    }
     this.helperMessage = this.props.helperMessage;
     this.errorMessage = this.props.errorMessage;
-    this.touched = this.props.touched? this.props.touched:false;
     this.touchEvent = this.touchEvent.bind(this);
     this.copyvalue = this.props.value;
+    this.wrapperRef = React.createRef();
+    this.handleClickOutside = this.handleClickOutside.bind(this);
+
   }
 
+  handleClickOutside(event) {
+    // if (this.wrapperRef && !this.wrapperRef.current.contains(event.target)) {
+    //   if (this.props.value !== undefined){
+    //   console.log('was touched',this.state.touched,JSON.stringify(this.props.value));
+    //   if (this.state.touched &&  JSON.stringify(this.props.value).length <= 0){
+    //     alert("You clicked outside of me!");
+    //   }
+    // }
+    // }
+  }
 
   componentDidMount(){
     this.update(this.value)
@@ -50,18 +65,21 @@ class FormControl extends React.Component {
   }
 }
 
-  touchEvent(e){
+//needs work not sure what to do. when touch is true and val <= 0 control invalid;
+//
+  touchEvent(e){e
     this.setState({touched:true},()=>{
-      if (this.required){
-        if (typeof this.props.value === 'string'){
-          if (this.props.value.length <= 0){
-            this.update(this.props.value,true)
-          }
-        } else
-            if (this.state.touched === true && JSON.stringify(this.props.value) === JSON.stringify(this.copyvalue)){
-              this.update(this.props.value,true)
-            }
-        }
+      // console.log('after touch',this.state)
+      // if (this.required){
+      //   if (typeof this.props.value === 'string'){
+      //     if (this.props.value.length <= 0){
+      //       this.update(this.props.value,true)
+      //     }
+      //   } else
+      //       if (this.state.touched === true && JSON.stringify(this.props.value) === JSON.stringify(this.copyvalue)){
+      //         this.update(this.props.value,true)
+      //       }
+      //   }
     })
   }
 
@@ -69,7 +87,7 @@ class FormControl extends React.Component {
     if (error === undefined){
       if (this.validator){
           this.subject$.next(null);
-          this.validator(value,this.subject$);
+          this.validator(value,this.subject$,this);
       }
       else {
           this.subject$.next(true);
@@ -111,8 +129,8 @@ class FormControl extends React.Component {
     }
 
 
-   return( <div className="formControl">
-            <this.props.JSXElement dataInject={this.props.dataInject} touchEvent={this.touchEvent} disabled={this.disabled} errorMessage={this.errorMessage} helperMessage={this.helperMessage} required={this.required} label={this.label} update={this.update} border={getBorder()} name={this.props.name}  value={ this.props.value? this.props.value: this.getDataType() } status={this.props.status}/>
+   return( <div className="formControl" onMouseDown={this.handleClickOutside} ref={this.wrapperRef} >
+            <this.props.JSXElement controlType={this.props.controlType} dataInject={this.props.dataInject} touchEvent={this.touchEvent} disabled={this.state.disabled} errorMessage={this.errorMessage} helperText={this.props.helperText} required={this.required} label={this.label} update={this.update} border={getBorder()} name={this.props.name}  value={ this.props.value? this.props.value: this.getDataType() } status={this.props.status}/>
     </div>
    )
   }

@@ -23,20 +23,12 @@ class FormGroup extends React.Component {
      Object.keys(this.props.controls).forEach(key=>{
       this.state.statuses[key]="VALID";
       this.refrences[key]=React.createRef();
-       switch (this.props.controls[key].type){
-        // case 'formControl': this.state.value[key] = "";
-        // break;
-        // case 'formArray': this.state.value[key] = [];
-        // break;
-        // case 'FormGroup': this.state.value[key] = {};
-        // break;
-       }
      })
      this.setParent = this.setParent.bind(this);
      this.checkStatus = this.checkStatus.bind(this);
      this.reset = this.reset.bind(this);
      this.copyState = Object.assign({},this.state)
-
+     this.autoFill = this.props.autoFill? this.props.autoFill: {}
   }
 
 
@@ -63,15 +55,14 @@ class FormGroup extends React.Component {
             }
             if ( control instanceof FormArray){
               control.reset();
-
             }
-
           });
         }
       });
       //this is fine what should happen is the furthest refrenece will validate again
 
     }
+
 
     setParent(key,value,status){
       var statuses =this.state.statuses
@@ -96,24 +87,28 @@ class FormGroup extends React.Component {
 
   makeChildren(ctls){
    return Object.keys(ctls).map( (key, index)=>{
+
       var child = ctls[key];
+      if (this.autoFill[key]){
+        this.state.value[key] = this.autoFill[key]
+       }
       if (child.type === 'formControl' ){
         if (child.JSXElement === undefined ){
           child.JSXElement = Input;
         }
-        return <FormControl dataInject={child.dataInject} dataType={child.dataType} className={child.className} required={child.required} helperMessage={child.helperMessage} errorMessage={child.errorMessage} ref={this.refrences[key]} disabled={child.disabled} width={child.width}  label={child.label} setParent={this.setParent} validator={child.validator} parent={this} control={child}  index={index}  JSXElement={child.JSXElement} name={key} value={this.state.value[key]} status={this.state.statuses[key]} key={key}/>
+        return <FormControl controlType={child.controlType} dataInject={child.dataInject} dataType={child.dataType} className={child.className} required={child.required} helperText={child.helperText} errorMessage={child.errorMessage} ref={this.refrences[key]} disabled={child.disabled} width={child.width}  label={child.label} setParent={this.setParent} validator={child.validator} parent={this} control={child}  index={index}  JSXElement={child.JSXElement} name={key} value={this.state.value[key]} status={this.state.statuses[key]} key={key}/>
         }
       if (child.type === 'formArray' ){
         if (child.JSXContainer === undefined ){
           child.JSXContainer = Container;
         }
-        return  <FormArray ref={this.refrences[key]}  setParent={this.setParent}   parent={this}  control={child} value={this.state.value[key]} name={key} key={key}  index={index} JSXContainer={child.JSXContainer} status={this.state.statuses[key]} controls={child.controls} />;
+        return  <FormArray autoFill={this.autoFill[key]} ref={this.refrences[key]} value={this.state.value[key]}  setParent={this.setParent}   parent={this}  control={child} value={this.state.value[key]} name={key} key={key}  index={index} JSXContainer={child.JSXContainer} status={this.state.statuses[key]} controls={child.controls} />;
       }
       if (child.type === 'formGroup' ){
         if (child.JSXContainer === undefined ){
           child.JSXContainer = Container;
         }
-        return <FormGroup ref={this.refrences[key]} setParent={this.setParent} parent={this}  control={child} value={this.state.value[key]} index={index}  name={key}  controls={child.controls} status={this.state.statuses[key]} JSXContainer={child.JSXContainer} key={key} />;
+        return <FormGroup autoFill={this.autoFill[key]}  ref={this.refrences[key]} value={this.state.value[key]} setParent={this.setParent} parent={this}  control={child} value={this.state.value[key]} index={index}  name={key}  controls={child.controls} status={this.state.statuses[key]} JSXContainer={child.JSXContainer} key={key} />;
       }
     })
   }
@@ -133,8 +128,8 @@ class FormGroup extends React.Component {
 
       return (
         <React.Fragment>
-        <div className = "formGroup"  style={{"borderLeft":"10px solid " +getBorder()}}>
-        <this.Container ref={this.state.ref} children={this.makeChildren(this.state.controls)}/>
+        <div className = "formGroup"  >
+        <this.Container ref={this.state.ref}  border={getBorder()} children={this.makeChildren(this.state.controls)}/>
        </div>
       </React.Fragment>)
     }

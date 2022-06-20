@@ -92,7 +92,8 @@ var Input = /*#__PURE__*/function (_React$Component) {
           _this.props.touchEvent(e);
         },
         value: this.props.value,
-        label: this.props.label ? this.props.label : "type here",
+        type: this.props.controlType,
+        label: this.props.innerlabel ? this.props.s : "type here",
         error: this.props.error ? this.props.error : false,
         required: this.props.required ? this.props.required : false,
         disabled: this.props.disabled ? this.props.disabled : false,
@@ -110,7 +111,8 @@ var Input = /*#__PURE__*/function (_React$Component) {
         style: {
           background: 'white',
           "borderLeft": "20px solid " + this.props.border,
-          "borderRadius": "10px"
+          "borderRadius": "10px",
+          boxSizing: "border-box"
         },
         id: "filled-basic",
         variant: "filled"
@@ -146,23 +148,39 @@ var FormControl = /*#__PURE__*/function (_React$Component) {
     _this.label = _this.props.label ? _this.props.label : 'type here';
     _this.width = _this.props.width ? _this.props.width : '200px';
     _this.dataType = _this.props.dataType;
-    _this.disabled = _this.props.disabled ? _this.props.disabled : false;
+    _this.parent = _this.props.parent; // this.disabled= this.props.disabled? this.props.disabled:false;
+
     _this.dataType = _this.props.dataType;
     _this.getDataType = _this.getDataType.bind(_assertThisInitialized(_this));
     _this.state = {
       error: false,
-      touched: false
+      touched: false,
+      dirty: false,
+      enabled: true,
+      disabled: _this.props.disabled ? _this.props.disabled : false
     };
     _this.value = _this.props.value ? _this.props.value : _this.getDataType();
     _this.helperMessage = _this.props.helperMessage;
     _this.errorMessage = _this.props.errorMessage;
-    _this.touched = _this.props.touched ? _this.props.touched : false;
     _this.touchEvent = _this.touchEvent.bind(_assertThisInitialized(_this));
     _this.copyvalue = _this.props.value;
+    _this.wrapperRef = /*#__PURE__*/React.createRef();
+    _this.handleClickOutside = _this.handleClickOutside.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(FormControl, [{
+    key: "handleClickOutside",
+    value: function handleClickOutside(event) {// if (this.wrapperRef && !this.wrapperRef.current.contains(event.target)) {
+      //   if (this.props.value !== undefined){
+      //   console.log('was touched',this.state.touched,JSON.stringify(this.props.value));
+      //   if (this.state.touched &&  JSON.stringify(this.props.value).length <= 0){
+      //     alert("You clicked outside of me!");
+      //   }
+      // }
+      // }
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.update(this.value);
@@ -189,35 +207,36 @@ var FormControl = /*#__PURE__*/function (_React$Component) {
       } else {
         return "";
       }
-    }
+    } //needs work not sure what to do. when touch is true and val <= 0 control invalid;
+    //
+
   }, {
     key: "touchEvent",
     value: function touchEvent(e) {
-      var _this2 = this;
-
       this.setState({
         touched: true
-      }, function () {
-        if (_this2.required) {
-          if (typeof _this2.props.value === 'string') {
-            if (_this2.props.value.length <= 0) {
-              _this2.update(_this2.props.value, true);
-            }
-          } else if (_this2.state.touched === true && JSON.stringify(_this2.props.value) === JSON.stringify(_this2.copyvalue)) {
-            _this2.update(_this2.props.value, true);
-          }
-        }
+      }, function () {// console.log('after touch',this.state)
+        // if (this.required){
+        //   if (typeof this.props.value === 'string'){
+        //     if (this.props.value.length <= 0){
+        //       this.update(this.props.value,true)
+        //     }
+        //   } else
+        //       if (this.state.touched === true && JSON.stringify(this.props.value) === JSON.stringify(this.copyvalue)){
+        //         this.update(this.props.value,true)
+        //       }
+        //   }
       });
     }
   }, {
     key: "update",
     value: function update(value, error) {
-      var _this3 = this;
+      var _this2 = this;
 
       if (error === undefined) {
         if (this.validator) {
           this.subject$.next(null);
-          this.validator(value, this.subject$);
+          this.validator(value, this.subject$, this);
         } else {
           this.subject$.next(true);
         }
@@ -236,38 +255,41 @@ var FormControl = /*#__PURE__*/function (_React$Component) {
           status = "VALID";
         }
 
-        if (_this3.props.parent.type === 'formGroup') {
-          _this3.props.setParent(_this3.name, value, status);
+        if (_this2.props.parent.type === 'formGroup') {
+          _this2.props.setParent(_this2.name, value, status);
         }
 
-        if (_this3.props.parent.type === 'formArray') {
-          _this3.props.setParent(_this3.props.index, value, status);
+        if (_this2.props.parent.type === 'formArray') {
+          _this2.props.setParent(_this2.props.index, value, status);
         }
       });
     }
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this3 = this;
 
       var getBorder = function getBorder() {
-        if (_this4.props.status === "VALID") {
+        if (_this3.props.status === "VALID") {
           return "#36bc78";
-        } else if (_this4.props.status === "PENDING") {
+        } else if (_this3.props.status === "PENDING") {
           return "#f2da33";
-        } else if (_this4.props.status === "INVALID") {
+        } else if (_this3.props.status === "INVALID") {
           return "#cb1842";
         }
       };
 
       return /*#__PURE__*/React.createElement("div", {
-        className: "formControl"
+        className: "formControl",
+        onMouseDown: this.handleClickOutside,
+        ref: this.wrapperRef
       }, /*#__PURE__*/React.createElement(this.props.JSXElement, {
+        controlType: this.props.controlType,
         dataInject: this.props.dataInject,
         touchEvent: this.touchEvent,
-        disabled: this.disabled,
+        disabled: this.state.disabled,
         errorMessage: this.errorMessage,
-        helperMessage: this.helperMessage,
+        helperText: this.props.helperText,
         required: this.required,
         label: this.label,
         update: this.update,
@@ -319,6 +341,7 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
     _this.setParent = _this.setParent.bind(_assertThisInitialized(_this));
     _this.checkStatus = _this.checkStatus.bind(_assertThisInitialized(_this));
     _this.copyState = Object.assign({}, _this.state);
+    _this.autoFill = _this.props.autoFill ? _this.props.autoFill : [];
     _this.copy = Object.assign({}, _this.props.controls.slice(0, 1)[0]);
 
     _this.state.controls.forEach(function (item, index) {
@@ -434,17 +457,22 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
       var _this4 = this;
 
       return ctls.map(function (child, index) {
+        if (_this4.autoFill[index]) {
+          _this4.state.value[index] = _this4.autoFill[index];
+        }
+
         if (child.type === 'formControl') {
           if (child.JSXElement === undefined) {
             child.JSXElement = Input;
           }
 
           return /*#__PURE__*/React.createElement(FormControl, {
+            controlType: child.controlType,
             dataInject: child.dataInject,
             dataType: child.dataType,
             className: child.className,
             required: child.required,
-            helperMessage: child.helperMessage,
+            helperText: child.helperText,
             errorMessage: child.errorMessage,
             ref: _this4.refrences[index],
             disabled: child.disabled,
@@ -470,7 +498,7 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormArray, {
-            l: true,
+            autoFill: _this4.autoFill[index],
             ref: _this4.refrences[index],
             setParent: _this4.setParent,
             parent: _this4,
@@ -491,7 +519,7 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
           }
 
           return /*#__PURE__*/React.createElement(FormGroup$1, {
-            l: true,
+            autoFill: _this4.autoFill[index],
             ref: _this4.refrences[index],
             setParent: _this4.setParent,
             parent: _this4,
@@ -574,11 +602,9 @@ var FormArray = /*#__PURE__*/function (_React$Component) {
       };
 
       return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        className: "formArray",
-        style: {
-          "borderLeft": "10px solid " + getBorder()
-        }
+        className: "formArray"
       }, /*#__PURE__*/React.createElement(this.props.JSXContainer, {
+        border: getBorder(),
         addChild: this.addChild,
         removeChild: this.removeChild,
         children: this.makeChildren(this.state.controls)
@@ -623,13 +649,12 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
     Object.keys(_this.props.controls).forEach(function (key) {
       _this.state.statuses[key] = "VALID";
       _this.refrences[key] = /*#__PURE__*/React.createRef();
-
-      switch (_this.props.controls[key].type) {}
     });
     _this.setParent = _this.setParent.bind(_assertThisInitialized(_this));
     _this.checkStatus = _this.checkStatus.bind(_assertThisInitialized(_this));
     _this.reset = _this.reset.bind(_assertThisInitialized(_this));
     _this.copyState = Object.assign({}, _this.state);
+    _this.autoFill = _this.props.autoFill ? _this.props.autoFill : {};
     return _this;
   }
 
@@ -706,17 +731,22 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
       return Object.keys(ctls).map(function (key, index) {
         var child = ctls[key];
 
+        if (_this4.autoFill[key]) {
+          _this4.state.value[key] = _this4.autoFill[key];
+        }
+
         if (child.type === 'formControl') {
           if (child.JSXElement === undefined) {
             child.JSXElement = Input;
           }
 
           return /*#__PURE__*/React.createElement(FormControl, {
+            controlType: child.controlType,
             dataInject: child.dataInject,
             dataType: child.dataType,
             className: child.className,
             required: child.required,
-            helperMessage: child.helperMessage,
+            helperText: child.helperText,
             errorMessage: child.errorMessage,
             ref: _this4.refrences[key],
             disabled: child.disabled,
@@ -736,43 +766,37 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
         }
 
         if (child.type === 'formArray') {
+          var _React$createElement;
+
           if (child.JSXContainer === undefined) {
             child.JSXContainer = Container;
           }
 
-          return /*#__PURE__*/React.createElement(FormArray, {
+          return /*#__PURE__*/React.createElement(FormArray, (_React$createElement = {
+            autoFill: _this4.autoFill[key],
             ref: _this4.refrences[key],
+            value: _this4.state.value[key],
             setParent: _this4.setParent,
             parent: _this4,
-            control: child,
-            value: _this4.state.value[key],
-            name: key,
-            key: key,
-            index: index,
-            JSXContainer: child.JSXContainer,
-            status: _this4.state.statuses[key],
-            controls: child.controls
-          });
+            control: child
+          }, _defineProperty(_React$createElement, "value", _this4.state.value[key]), _defineProperty(_React$createElement, "name", key), _defineProperty(_React$createElement, "key", key), _defineProperty(_React$createElement, "index", index), _defineProperty(_React$createElement, "JSXContainer", child.JSXContainer), _defineProperty(_React$createElement, "status", _this4.state.statuses[key]), _defineProperty(_React$createElement, "controls", child.controls), _React$createElement));
         }
 
         if (child.type === 'formGroup') {
+          var _React$createElement2;
+
           if (child.JSXContainer === undefined) {
             child.JSXContainer = Container;
           }
 
-          return /*#__PURE__*/React.createElement(FormGroup, {
+          return /*#__PURE__*/React.createElement(FormGroup, (_React$createElement2 = {
+            autoFill: _this4.autoFill[key],
             ref: _this4.refrences[key],
+            value: _this4.state.value[key],
             setParent: _this4.setParent,
             parent: _this4,
-            control: child,
-            value: _this4.state.value[key],
-            index: index,
-            name: key,
-            controls: child.controls,
-            status: _this4.state.statuses[key],
-            JSXContainer: child.JSXContainer,
-            key: key
-          });
+            control: child
+          }, _defineProperty(_React$createElement2, "value", _this4.state.value[key]), _defineProperty(_React$createElement2, "index", index), _defineProperty(_React$createElement2, "name", key), _defineProperty(_React$createElement2, "controls", child.controls), _defineProperty(_React$createElement2, "status", _this4.state.statuses[key]), _defineProperty(_React$createElement2, "JSXContainer", child.JSXContainer), _defineProperty(_React$createElement2, "key", key), _React$createElement2));
         }
       });
     }
@@ -792,12 +816,10 @@ var FormGroup = /*#__PURE__*/function (_React$Component) {
       };
 
       return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        className: "formGroup",
-        style: {
-          "borderLeft": "10px solid " + getBorder()
-        }
+        className: "formGroup"
       }, /*#__PURE__*/React.createElement(this.Container, {
         ref: this.state.ref,
+        border: getBorder(),
         children: this.makeChildren(this.state.controls)
       })));
     }
